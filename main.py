@@ -7,4 +7,4 @@ class App:
         SafeBooruDownloader(tagstr, this.options).runJobs()
     s, sb, safe = safebooru, safebooru, safebooru 
 
-SafeBooruDownloader("skirt", DownloaderOptions(True, True, False, 1, "./out", True)).getPosts(1, ["skirt"])
+SafeBooruDownloader("skirt", DownloaderOptions(True, True, False, 1, "./out", True)).runJobs()

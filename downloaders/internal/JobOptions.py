@@ -2,8 +2,8 @@ from dataclasses import dataclass, field
 
 @dataclass()
 class JobOptions():
-    doRunDownload: bool = field(True)
-    doShowsProgress: bool = field(True)
-    doProgressMax: bool = field(True)
+    doRunDownload: bool = field(init=True)
+    doShowsProgress: bool = field(init=True)
+    doProgressMax: bool = field(init=True)
     progressCurr: int
     progressMax: int

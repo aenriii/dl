@@ -5,6 +5,6 @@ class DownloaderOptions:
     safe: bool
     questionable: bool
     explicit: bool
-    imageCount: int
+    numPosts: int
     outputDirectory: str
     simulate: bool

@@ -1,5 +1,8 @@
-
+from .downloaders import SafeBooruDownloader, DownloaderOptions
 @dataclass
 class App:
-    def safebooru(self):
-        
+    options: DownloaderOptions
+    def safebooru(this, tagstr):
+        SafeBooruDownloader(tagstr, this.options).runJobs()
+    s, sb, safe = safebooru, safebooru, safebooru 
+

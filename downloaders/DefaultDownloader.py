@@ -8,6 +8,11 @@ class DefaultDownloader:
     retrieveJobOptions: JobOptions
     discoveryJob: Job
     retrieveJob: Job
+    http_client: Session = Session()
+    base_headers: Dict[str, str] = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko), Chrome/91.0.4472.124 Safari/537.36"
+    }
+
     l: Logger = field(Logger())
     def __init__(this, tags_str: str, options: DownloaderOptions):
         this.options = options
@@ -20,3 +25,5 @@ class DefaultDownloader:
         this.retrieveJob.start()
     def processTags(self, tags_str: str) -> List[str]:
         return [""] # Defined by inherited classes, abstract.
+    def get(this, uri):
+        return this.http_client.get(uri, headers=this.base_headers)

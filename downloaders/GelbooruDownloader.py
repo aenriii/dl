@@ -10,15 +10,15 @@ from .download import DownloadableFile
 from urllib.request import urlretrieve
 from threading import Thread
 
-class SafeBooruDownloader(DefaultDownloader):
-    base_uri: str = "https://safebooru.org/"
+class GelbooruDownloader(DefaultDownloader):
+    base_uri: str = "https://gelbooru.com/"
     http_client: Session = Session()
     base_headers: Dict[str, str] = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko), Chrome/91.0.4472.124 Safari/537.36"
     }
 
     def __init__(self, tags_str: str, options: DownloaderOptions):
-        self.l.log("Entering SafeBooruDownloader.__init__")
+        self.l.log("Entering GelbooruDownloader.__init__")
         DefaultDownloader.__init__(self, tags_str, options)
         self.doDownload()
 
@@ -34,7 +34,7 @@ class SafeBooruDownloader(DefaultDownloader):
                     tags.remove(i)
                     i -= 1
             except Exception as e:
-                self.l.log(e.__str__() + " ERROR")
+                self.l.log(e + " ERROR")
                 break
         return tags
 
@@ -64,9 +64,9 @@ class SafeBooruDownloader(DefaultDownloader):
             cPostsIterated = postsIterated
             for post in self.getPostInformationByUri(currUrl):
                 postsIterated += 1
-                if self.isAllowed(self.parseRating(post["title"])):
-                    self.l.log("Yielding image uri: " + self.getImageUriFromPostUri(self.base_uri + post["href"]))
-                    yield {"uri": self.getImageUriFromPostUri(self.base_uri + post["href"]), "title": post["id"]}
+                if self.isAllowed(post["title"]):
+                    self.l.log("Yielding image uri: " + self.getImageUriFromPostUri(post["href"]))
+                    yield {"uri": self.getImageUriFromPostUri(post["href"]), "title": post["id"]}
             if cPostsIterated == postsIterated:
                 break
 
@@ -79,7 +79,7 @@ class SafeBooruDownloader(DefaultDownloader):
                 yield currUri
             else:
                 yield currUri + "&pid=" + str(index)
-            index += 40
+            index += 42
 
     def getPostInformationByUri(self, uri: str):
         html = bs(self.get(uri).text, features="html5lib")
@@ -87,23 +87,18 @@ class SafeBooruDownloader(DefaultDownloader):
         if len(html.select("#content div h1")) != 0:
             self.l.log("Tag claims invalid, " + html.select("#content div h1")[0].text)
             return []
-        for post in html.select("span.thumb[id] a[id][href*=\"s=view\"]"):
+        for post in html.select("article.thumbnail-preview a[id][href*=\"s=view\"]"):
             self.l.log("Yielding attributes.")
             yield dict(**post.attrs, **post.select("img")[0].attrs)
 
     def getImageUriFromPostUri(self, postUri: str):
         html = bs(self.get(postUri).text, features="html5lib")
         # Check if is sample image.
-        if "sample" in html.select("#image")[0].attrs["src"]:
-            self.l.log("Sample image detected, parsing for better.")
-            return html.select("a[href*=\"image\"]")[0].attrs["href"]
-        return html.select("#image")[0].attrs["src"]
-
-    def parseRating(self, containingString: str):
-        return ""  # Unneeded, self is safebooru.
+        return html.select("a[href*=\"image\"]")[0].attrs["href"]
 
     def isAllowed(self, ratingString: str):
-        return True  # Unneeded, self is safebooru.
+        ratingString = ratingString[ratingString.index("rating:")+len("rating:"):].split(" ")[0]
+        return (ratingString == "safe" and self.options.safe) or (ratingString == "questionable" and self.options.questionable) or (ratingString == "explicit" and self.options.explicit)
 
     def doDownload(self):
         i = 0
